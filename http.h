@@ -1,11 +1,18 @@
 
 int http_error(int erron);
+int http_pack_free(http_pack * http);
 
 struct _http_head_struct{
     char * key;
     char * value;
 };
 typedef struct _http_head_struct http_head;
+
+struct _http_body_struct{
+    int len;
+    char * val;
+};
+typedef struct _http_body_struct http_body;
 
 struct _http_pack_struct {
     short version;
@@ -18,7 +25,7 @@ struct _http_pack_struct {
         char * uri;
         char * comment;
     };
-    char * body;
+    http_body body;
     union{
         http_head head[1];
     };
@@ -36,11 +43,16 @@ typedef struct _http_pack_struct http_pack;
 #define HTTP11 1
 #define HTTP20 2
 
+
+
 //http_error
 #define HTTP_VERSION_ERROR 65
 #define HTTP_URI_ERROR 66
 #define HTTP_METHOD_ERROR 67
 #define HTTP_HEAD_ERROR 68
+
+#define HTTP_STR_VERSION_ERROR 75
+#define HTTP_STR_HEAD_ERROR 76
 
 
 //http_method

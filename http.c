@@ -37,7 +37,8 @@ http_pack * str_to_http(char * str){//receive a http package, must a start line,
 
     http_pack * http;
     http = calloc(1, (sizeof(http_pack) + sizeof(http_head) * (num - 2)));
-    http->body = start;
+    //http->body = NULL;
+    //we need parse the http head to get the content-length and then receive the body 
 
     strlist * node;
     node = slist;
@@ -121,8 +122,57 @@ http_pack * str_to_http(char * str){//receive a http package, must a start line,
 }
 
 
-char * http_to_str(http_pack * http){
-    char * response;
+strlist * http_to_strlist(http_pack * http){
+
+    strlist * slist;
+    slist = (strlist *)calloc(1, sizeof(strlist));
+    slist->fina = slist;
+
+    char * temp;
+    temp = (char *)calloc(1, (strlen(http->comment) + 15));
+    if(http->version == HTTP10){
+        //*temp = "HTTP/1.0";
+        memcpy(temp, "HTTP/1.0", 8);
+    }
+    else if(http->version == HTTP11){
+        //*temp = "HTTP/1.1";
+        memcpy(temp, "HTTP/1.1", 8);
+    }
+    else if(http->version == HTTP20){
+        //*temp = "HTTP/2.0";
+        memcpy(temp, "HTTP/2.0", 8);
+    }
+    else{
+        return http_error(HTTP_STR_VERSION_ERROR);
+    }
+    sprintf((temp + 8), " %hd %s\r\n", http->status, http->comment);
+
+    strlist * node;
+    node = (strlist *)calloc(1, sizeof(strlist));
+    node->val = temp;
+    addstr(slist, node);
+
+    int num = 0;
+    while(num < http->head_num){
+        char * key, * value;
+        key = http->head[num].key;
+        value = http->head[num].value;
+        temp = (char *)calloc(1, (strlen(key) + strlen(value) + 5));
+        sprintf(temp, "%s: %s\r\n", key, value);
+        node = (strlist *)calloc(1, sizeof(strlist));
+        node->val = temp;
+        addstr(slist, node);
+        num++;
+    }
+
+    //body
+    *temp = (char *)calloc(1, http->body.len + 2);
+    sprintf(temp, "%s\r\n", http->body.val);
+    node = (strlist *)calloc(1, sizeof(strlist));
+    node->val = temp;
+    addstr(slist, node);
+
+    return slist;
 }
 
 
@@ -131,4 +181,8 @@ int http_error(int erron){
     error_log(erron);
     //exit(erron);
     return erron;
+}
+
+int http_pack_free(http_pack * http){
+    return 0;
 }
