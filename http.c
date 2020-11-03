@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <http.h>
-#include <types.h>
+#include "http.h"
+#include "types.h"
+#include "log.h"
 
-int str_to_http(char * str){//receive a http package, must a start line, and end by \r\n\0
+//we can not know when to end this request, so we should parse the head and find the Content-Length, then read(0, body, Content-Length) + '\0';
+http_pack * str_to_http(char * str){//receive a http package, must a start line, and end by \r\n\0
     char * start;
     start = str;
     int num = 0;
@@ -26,7 +28,7 @@ int str_to_http(char * str){//receive a http package, must a start line, and end
         strlist * node;
         node = (strlist *)calloc(1, sizeof(strlist));
         node->val = temp;
-        add(slist, node);
+        addstr(slist, node);
     }
     start = start + 2;
     char * body;
@@ -113,8 +115,14 @@ int str_to_http(char * str){//receive a http package, must a start line, and end
     slist = slist->next;
     free(node);
     }
-    return 0;
+    http->head_num = num;
+    return http;
 
+}
+
+
+char * http_to_str(http_pack * http){
+    char * response;
 }
 
 

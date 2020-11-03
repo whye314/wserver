@@ -1,31 +1,34 @@
 
 int http_error(int erron);
 
+struct _http_head_struct{
+    char * key;
+    char * value;
+};
+typedef struct _http_head_struct http_head;
+
 struct _http_pack_struct {
-    int version;
+    short version;
     union{
-        int method;
-        int status;
+        short method;
+        short status;
     };
+    int head_num;
     union{
         char * uri;
         char * comment;
     };
     char * body;
-    http_head head[1];
+    union{
+        http_head head[1];
+    };
 };
 
-struct _http_head_struct{
-    char * key;
-    char * value;
-};
 
-struct _http_body_struct{
-    
-};
+
+
 typedef struct _http_pack_struct http_pack;
-typedef struct _http_head_struct http_head;
-typedef struct _http_body_struct http_body;
+
 
 
 //http_version
