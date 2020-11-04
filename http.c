@@ -4,9 +4,10 @@
 #include "http.h"
 #include "types.h"
 #include "log.h"
+#include "error.h"
 
 //we can not know when to end this request, so we should parse the head and find the Content-Length, then read(0, body, Content-Length) + '\0';
-http_pack * str_to_http(char * str){//receive a http package, must a start line, and end by \r\n\0
+http_pack * str_to_http_head(char * str){//receive a http package, must a start line, and end by \r\n\0
     char * start;
     start = str;
     int num = 0;
@@ -37,7 +38,7 @@ http_pack * str_to_http(char * str){//receive a http package, must a start line,
 
     http_pack * http;
     http = calloc(1, (sizeof(http_pack) + sizeof(http_head) * (num - 2)));
-    //http->body = NULL;
+    http->body.len = 0;
     //we need parse the http head to get the content-length and then receive the body 
 
     strlist * node;
@@ -59,14 +60,16 @@ http_pack * str_to_http(char * str){//receive a http package, must a start line,
         http->version = HTTP20;
     }
     else{
-        return http_error(HTTP_VERSION_ERROR);
+        http_pack_free(http);
+        return error(HTTP_VERSION_ERROR);
     }
 
     //http uri
     *last = 0;
     last = strrchr(slist->val, 0x20);
     if(!last){
-        return http_error(HTTP_URI_ERROR);
+        http_pack_free(http);
+        return error(HTTP_URI_ERROR);
     }
     //http->uri = last + 1;
     http->uri = calloc(1, strlen(last) + 1);
@@ -94,7 +97,8 @@ http_pack * str_to_http(char * str){//receive a http package, must a start line,
         http->method = HTTP_METHOD_DELETE;
     }
     else{
-        return http_error(HTTP_METHOD_ERROR);
+        http_pack_free(http);
+        return error(HTTP_METHOD_ERROR);
     }
     free(slist->val);
 
@@ -107,7 +111,8 @@ http_pack * str_to_http(char * str){//receive a http package, must a start line,
     while(slist!=NULL){
         char * val;
         if(val = strstr(slist->val, ": ")){
-            return http_error(HTTP_HEAD_ERROR);
+            http_pack_free(http);
+            return error(HTTP_HEAD_ERROR);
         }
     http->head[num].value = (val + 2);
     *val = 0;
@@ -117,6 +122,8 @@ http_pack * str_to_http(char * str){//receive a http package, must a start line,
     free(node);
     }
     http->head_num = num;
+
+
     return http;
 
 }
@@ -143,7 +150,9 @@ strlist * http_to_strlist(http_pack * http){
         memcpy(temp, "HTTP/2.0", 8);
     }
     else{
-        return http_error(HTTP_STR_VERSION_ERROR);
+        free(temp);
+        http_slist_free(slist);
+        return error(HTTP_STR_VERSION_ERROR);
     }
     sprintf((temp + 8), " %hd %s\r\n", http->status, http->comment);
 
@@ -177,11 +186,7 @@ strlist * http_to_strlist(http_pack * http){
 
 
 
-int http_error(int erron){
-    error_log(erron);
-    //exit(erron);
-    return erron;
-}
+
 
 int http_pack_free(http_pack * http){
     return 0;

@@ -1,0 +1,16 @@
+int error(int erron);
+
+
+//http_error
+#define HTTP_VERSION_ERROR -65
+#define HTTP_URI_ERROR -66
+#define HTTP_METHOD_ERROR -67
+#define HTTP_HEAD_ERROR -68
+
+#define HTTP_STR_VERSION_ERROR -75
+#define HTTP_STR_HEAD_ERROR -76
+
+#define SOCKET_CREATE_ERROR -80
+#define SOCKET_BIND_ERROR -81
+#define SOCKET_LISTEN_ERROR -82
+#define SOCKET_ACCEPT_ERROR -83

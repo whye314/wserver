@@ -1,6 +1,7 @@
 
-int http_error(int erron);
+
 int http_pack_free(http_pack * http);
+char * get_head_val(http_pack * http, const char * key);
 
 struct _http_head_struct{
     char * key;
