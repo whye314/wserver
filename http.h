@@ -7,6 +7,7 @@ struct _http_head_struct{
     char * key;
     char * value;
 };
+
 typedef struct _http_head_struct http_head;
 
 struct _http_body_struct{

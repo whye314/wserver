@@ -8,6 +8,8 @@
 #include "log.h"
 #include "error.h"
 
+int doit(int fd);
+
 int main(int argc, char ** args){
     int listenfd, connfd;
     int listen_port = 80;
@@ -27,4 +29,8 @@ int main(int argc, char ** args){
         close(connfd);
     }
 
+}
+
+int doit(int fd){
+    
 }
