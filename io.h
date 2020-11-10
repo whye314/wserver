@@ -1,9 +1,13 @@
 
 
+#define IO_MAX_BUF 516
+
+ 
 struct _io_buf_struct{
     unsigned int fd;
     unsigned int len;
-    char s[100];
+    unsigned int vernier;
+    char s[IO_MAX_BUF];
 };
 
 
