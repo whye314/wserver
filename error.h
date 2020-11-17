@@ -14,3 +14,5 @@ int error(int erron);
 #define SOCKET_BIND_ERROR -81
 #define SOCKET_LISTEN_ERROR -82
 #define SOCKET_ACCEPT_ERROR -83
+
+#define HTTP_HEAD_TO_LARGE -90

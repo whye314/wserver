@@ -32,9 +32,9 @@ http_pack * str_to_http_head(char * str){//receive a http package, must a start 
         addstr(slist, node);
     }
     start = start + 2;
-    char * body;
-    body = (char *)calloc(1, strlen(start) + 1);
-    strcpy(body, start);
+    //char * body;
+    //body = (char *)calloc(1, strlen(start) + 1);
+    //strcpy(body, start);
 
     http_pack * http;
     http = calloc(1, (sizeof(http_pack) + sizeof(http_head) * (num - 2)));

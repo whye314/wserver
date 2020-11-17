@@ -7,6 +7,7 @@
 #include "http.h"
 #include "log.h"
 #include "error.h"
+#include "io.h"
 
 int doit(int fd);
 
@@ -32,5 +33,11 @@ int main(int argc, char ** args){
 }
 
 int doit(int fd){
-    
+    char * tmps;
+    tmps = (char *)calloc(1, HTTP_MAX_HEAD_SIZE * sizeof(char));
+    io_buf * io;
+    io_init(io, fd);
+    if(io_reads(io, tmps, "\r\n\r\n") > HTTP_MAX_HEAD_SIZE)
+        error(HTTP_HEAD_TO_LARGE);
+
 }

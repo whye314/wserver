@@ -64,3 +64,5 @@ typedef struct _http_pack_struct http_pack;
 #define HTTP_METHOD_PUT 3
 #define HTTP_METHOD_HEAD 4
 #define HTTP_METHOD_DELETE 5
+
+#define HTTP_MAX_HEAD_SIZE 2048
