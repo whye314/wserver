@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -37,7 +38,36 @@ int doit(int fd){
     tmps = (char *)calloc(1, HTTP_MAX_HEAD_SIZE * sizeof(char));
     io_buf * io;
     io_init(io, fd);
-    if(io_reads(io, tmps, "\r\n\r\n") > HTTP_MAX_HEAD_SIZE)
+    if(io_reads(io, tmps, "\r\n\r\n") > HTTP_MAX_HEAD_SIZE){
         error(HTTP_HEAD_TO_LARGE);
+        free(io);
+        free(tmps);
+        close(fd);
+        return 0;
+    }
+    http_pack * http_request;
+    http_request = str_to_http_head(tmps);
+    if(http_request->method == HTTP_METHOD_POST){
+        int l = atoi(http_get_head_val(http_request, "Content-Length"));
+        http_request->body.len = l;
+        char * body;
+        body = (char *)calloc(1, l+1);
+        int readlen = 0;
+        while(1){//need alarm
+            readlen += io_readn(io, (body+readlen), (l-readlen));
+            if(readlen == l) break;
+        }
+        http_request->body.val = body;
+    }
+
+    http_pack * http_response;
+    http_response = http_prase(http_request);
+    
+
+
+
+
+    
+        
 
 }

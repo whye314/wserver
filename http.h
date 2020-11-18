@@ -1,7 +1,9 @@
 
 
 int http_pack_free(http_pack * http);
-char * get_head_val(http_pack * http, const char * key);
+char * http_get_head_val(http_pack * http, const char * key);
+http_pack * str_to_http_head(char * str);
+strlist * http_to_strlist(http_pack * http);
 
 struct _http_head_struct{
     char * key;

@@ -185,7 +185,19 @@ strlist * http_to_strlist(http_pack * http){
 }
 
 
-
+char * http_get_head_val(http_pack * http, const char * key){
+    int num = http->head_num;
+    while(num-- > 0){
+        if(!strcmp(http->head[num].key, key)){
+            // char *s;
+            // s = (char *)calloc(1, strlen(http->head[num].value) + 1);
+            // memcpy(s, http->head[num].value, strlen(http->head[num].value) + 1);
+            // return s;
+            return http->head[num].value;
+        }
+    }
+    return NULL;
+}
 
 
 int http_pack_free(http_pack * http){
