@@ -185,7 +185,7 @@ strlist * http_to_strlist(http_pack * http){
 }
 
 
-char * http_get_head_val(http_pack * http, const char * key){
+char * http_get_head_val(http_pack * http, const char * key){//return pointer that already exists
     int num = http->head_num;
     while(num-- > 0){
         if(!strcmp(http->head[num].key, key)){
@@ -196,10 +196,51 @@ char * http_get_head_val(http_pack * http, const char * key){
             return http->head[num].value;
         }
     }
-    return NULL;
+    return 0;
+}
+
+
+char * http_to_str(char * buf, http_pack * http){
+    strlist * slist;
+    slist = http_to_strlist(http);
+    buf = (char *)calloc(1, (HTTP_MAX_HEAD_SIZE + http->body.len) * sizeof(char));
+    int writelen = 0;
+    while(slist = slist->next != NULL){
+        strcpy((buf+writelen), slist->val);
+        strcat(buf, "\r\n");
+        writelen += (strlen(slist->val)) + 2;
+    }
+    strcat(buf, "\r\n");
+    writelen += 2;
+    memcpy((buf+writelen), http->body.val, http->body.len);//http_head_len < HTTP_MAX_HEAD_SIZE - 1
+    writelen += http->body.len;
+    return writelen;
 }
 
 
 int http_pack_free(http_pack * http){
+    int i = http->head_num;
+    while(i-->=0){
+        free(http->head[i].value);
+        free(http->head[i].key);
+    }
+    free(http->body.val);
+    free(http->uri);
+    free(http);
     return 0;
+}
+
+
+http_pack * http_prase(http_pack * http_request){
+    char * uri;
+    int urilen = strlen(http_request->uri);
+    uri = (char *)calloc(1, (urilen + 1) * sizeof(char));
+    memcpy(uri, http_request->uri, urilen + 1);
+    int i = 0;
+    if(i = strstr(uri, "../") != NULL){
+        int index = i;
+        for(index = i; index <= urilen-3; index++){
+            uri[index] = uri[index+3];
+        }
+    }
 }

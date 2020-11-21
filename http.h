@@ -4,6 +4,8 @@ int http_pack_free(http_pack * http);
 char * http_get_head_val(http_pack * http, const char * key);
 http_pack * str_to_http_head(char * str);
 strlist * http_to_strlist(http_pack * http);
+char * http_to_str(char * buf, http_pack * http);
+http_pack * http_prase(http_pack * http_request);
 
 struct _http_head_struct{
     char * key;
@@ -67,4 +69,6 @@ typedef struct _http_pack_struct http_pack;
 #define HTTP_METHOD_HEAD 4
 #define HTTP_METHOD_DELETE 5
 
-#define HTTP_MAX_HEAD_SIZE 2048
+#define HTTP_MAX_HEAD_SIZE 4096
+
+#define ROOT_DOCUMENT "/var/www/html/"
