@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "http.h"
 #include "types.h"
 #include "log.h"
@@ -200,7 +201,7 @@ char * http_get_head_val(http_pack * http, const char * key){//return pointer th
 }
 
 
-char * http_to_str(char * buf, http_pack * http){
+int http_to_str(char * buf, http_pack * http){
     strlist * slist;
     slist = http_to_strlist(http);
     buf = (char *)calloc(1, (HTTP_MAX_HEAD_SIZE + http->body.len) * sizeof(char));
@@ -237,10 +238,39 @@ http_pack * http_prase(http_pack * http_request){
     uri = (char *)calloc(1, (urilen + 1) * sizeof(char));
     memcpy(uri, http_request->uri, urilen + 1);
     int i = 0;
-    if(i = strstr(uri, "../") != NULL){
+    while(i = strstr(uri, "../") != NULL){
         int index = i;
-        for(index = i; index <= urilen-3; index++){
+        urilen -=3;
+        for(index = i; index <= urilen; index++){
             uri[index] = uri[index+3];
         }
+        
     }
+    uri[urilen] = '\0';
+    char * path;
+    path = (char *)calloc(1, urilen+1+strlen(ROOT_DOCUMENT)+strlen(DEFAULT_TARGET_FILE));
+    memcpy(path, ROOT_DOCUMENT, strlen(ROOT_DOCUMENT));
+    strcat(path, uri);
+    free(uri);
+    char * query, * tmp;
+    query = strchr(path, '?');
+    urilen = (int)(query - path);
+    *query = '\0';
+    query += 1;
+    if(path[urilen-1] == '/'){
+        strcat(path, DEFAULT_TARGET_FILE);
+    }
+    FILE * target_file;
+    target_file = fopen(path, "rb");
+    char *buf;
+    int l = 0;
+    buf = (char *)calloc(1, 1024 * sizeof(char));
+    while(l = fread(buf, 1, 1024, target_file) > 0){
+        write(fd, buf, l);
+    }
+    free(uri);
+    free(path);
+    free(buf);
+    fclose(target_file);
+    return 0;
 }

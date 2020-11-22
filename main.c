@@ -67,10 +67,10 @@ int doit(int fd){
 
     http_pack * http_response;
     http_response = http_prase(http_request);
-    char * http_str;
-    int response_len = 0;
-    response_len = http_to_str(http_str, http_response);
-    write(fd, http_str, response_len);
+    // char * http_str;
+    // int response_len = 0;
+    // response_len = http_to_str(http_str, http_response);
+    // write(fd, http_str, response_len);
     free(tmps);
     free(io);
     free(http_response);

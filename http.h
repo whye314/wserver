@@ -4,7 +4,7 @@ int http_pack_free(http_pack * http);
 char * http_get_head_val(http_pack * http, const char * key);
 http_pack * str_to_http_head(char * str);
 strlist * http_to_strlist(http_pack * http);
-char * http_to_str(char * buf, http_pack * http);
+int http_to_str(char * buf, http_pack * http);//return response http pack len, include head and body
 http_pack * http_prase(http_pack * http_request);
 
 struct _http_head_struct{
@@ -72,3 +72,5 @@ typedef struct _http_pack_struct http_pack;
 #define HTTP_MAX_HEAD_SIZE 4096
 
 #define ROOT_DOCUMENT "/var/www/html/"
+
+#define DEFAULT_TARGET_FILE "index.html"
