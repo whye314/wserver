@@ -14,16 +14,19 @@
 int doit(int fd);
 
 int main(int argc, char ** args){
-    int listenfd, connfd;
+    int listenfd = 0, connfd = 0;
     int listen_port = 80;
-    listenfd = open_listen(listen_port);
+    if((listenfd = open_listen(listen_port)) < 0){//instead of if(listenfd = open_listen(listen_port) < 0)
+        return error(SOCKET_OPEN_LISTEN_ERROR);
+    }
 
     struct sockaddr_in * client_addr;
     client_addr = (struct sockaddr_in *)calloc(1, sizeof(struct sockaddr_in));
     int clientlen = sizeof(struct sockaddr_in);
 
     while(1){
-        if(connfd = accept(listenfd, (struct sockaddr *)client_addr, &clientlen) < 0){
+        if((connfd = accept(listenfd, (struct sockaddr *)client_addr, &clientlen)) < 0){
+            perror("accept");
             free(client_addr);
             return error(SOCKET_ACCEPT_ERROR);
         }
@@ -38,6 +41,7 @@ int doit(int fd){
     char * tmps;
     tmps = (char *)calloc(1, HTTP_MAX_HEAD_SIZE * sizeof(char));
     io_buf * io;
+    io = (io_buf *)calloc(1, sizeof(io_buf));
     io_init(io, fd);
     if(io_reads(io, tmps, "\r\n\r\n") > HTTP_MAX_HEAD_SIZE){
         
@@ -66,7 +70,7 @@ int doit(int fd){
     }
 
     http_pack * http_response;
-    http_response = http_prase(http_request);
+    http_response = http_prase(fd, http_request);
     // char * http_str;
     // int response_len = 0;
     // response_len = http_to_str(http_str, http_response);
@@ -75,7 +79,7 @@ int doit(int fd){
     free(io);
     free(http_response);
     http_pack_free(http_request);
-    http_pack_free(http_response);
+    //http_pack_free(http_response);
     close(fd);
     return 0;
 

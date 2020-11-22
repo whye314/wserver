@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "http.h"
+
+
 #include "types.h"
 #include "log.h"
 #include "error.h"
+#include "http.h"
 
 //we can not know when to end this request, so we should parse the head and find the Content-Length, then read(0, body, Content-Length) + '\0';
 http_pack * str_to_http_head(char * str){//receive a http package, must a start line, and end by \r\n\0
@@ -20,7 +22,7 @@ http_pack * str_to_http_head(char * str){//receive a http package, must a start 
     while(1){
         int size = 0;
         char * temp;
-        if(size = strstr(start, "\r\n") - start)
+        if((size = strstr(start, "\r\n") - start) == 0)
             break;
         temp = (char *)calloc(1, size+1);
         memcpy(temp, start, size);
@@ -73,7 +75,7 @@ http_pack * str_to_http_head(char * str){//receive a http package, must a start 
         return error(HTTP_URI_ERROR);
     }
     //http->uri = last + 1;
-    http->uri = calloc(1, strlen(last) + 1);
+    http->uri = calloc(1, strlen(last));
     strcpy(http->uri, last + 1);
     *last = 0;
 
@@ -111,11 +113,12 @@ http_pack * str_to_http_head(char * str){//receive a http package, must a start 
     num = 0;
     while(slist!=NULL){
         char * val;
-        if(val = strstr(slist->val, ": ")){
+        if((val = strstr(slist->val, ": ")) == NULL){
             http_pack_free(http);
             return error(HTTP_HEAD_ERROR);
         }
-    http->head[num].value = (val + 2);
+    http->head[num].value = (char *)calloc(1, strlen(slist->val)+(val - slist->val - 1));
+    strcpy(http->head[num].value, (val+2));
     *val = 0;
     http->head[num++].key = slist->val;
     node = slist;
@@ -206,7 +209,7 @@ int http_to_str(char * buf, http_pack * http){
     slist = http_to_strlist(http);
     buf = (char *)calloc(1, (HTTP_MAX_HEAD_SIZE + http->body.len) * sizeof(char));
     int writelen = 0;
-    while(slist = slist->next != NULL){
+    while((slist = slist->next) != NULL){
         strcpy((buf+writelen), slist->val);
         strcat(buf, "\r\n");
         writelen += (strlen(slist->val)) + 2;
@@ -232,13 +235,13 @@ int http_pack_free(http_pack * http){
 }
 
 
-http_pack * http_prase(http_pack * http_request){
+http_pack * http_prase(int fd, http_pack * http_request){
     char * uri;
     int urilen = strlen(http_request->uri);
     uri = (char *)calloc(1, (urilen + 1) * sizeof(char));
     memcpy(uri, http_request->uri, urilen + 1);
     int i = 0;
-    while(i = strstr(uri, "../") != NULL){
+    while((i = strstr(uri, "../")) != NULL){
         int index = i;
         urilen -=3;
         for(index = i; index <= urilen; index++){
@@ -253,22 +256,27 @@ http_pack * http_prase(http_pack * http_request){
     strcat(path, uri);
     free(uri);
     char * query, * tmp;
-    query = strchr(path, '?');
-    urilen = (int)(query - path);
-    *query = '\0';
-    query += 1;
+    if((query = strchr(path, '?')) != NULL){
+        urilen = (int)(query - path);
+        *query = '\0';
+        query += 1;
+    }
+
     if(path[urilen-1] == '/'){
         strcat(path, DEFAULT_TARGET_FILE);
     }
     FILE * target_file;
-    target_file = fopen(path, "rb");
+    //need strlist to add http response head, and then new a reponse http_pack and return to main
+    if((target_file = fopen(path, "rb")) == NULL){//here need an error handling
+    
+    
+    }
     char *buf;
     int l = 0;
     buf = (char *)calloc(1, 1024 * sizeof(char));
-    while(l = fread(buf, 1, 1024, target_file) > 0){
+    while((l = fread(buf, 1, 1024, target_file)) > 0){
         write(fd, buf, l);
     }
-    free(uri);
     free(path);
     free(buf);
     fclose(target_file);

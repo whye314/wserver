@@ -7,3 +7,7 @@ int addstr(strlist * head, strlist * node){
     head->fina = node;
     return 0;
 }
+
+int http_slist_free(strlist * slkist){
+    return 0;
+}

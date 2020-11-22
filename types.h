@@ -14,3 +14,4 @@ struct _strlist_struct{
 typedef struct _strlist_struct strlist;
 
 int addstr(strlist * head, strlist * node);
+int http_slist_free(strlist * slkist);

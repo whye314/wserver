@@ -1,12 +1,4 @@
 
-
-int http_pack_free(http_pack * http);
-char * http_get_head_val(http_pack * http, const char * key);
-http_pack * str_to_http_head(char * str);
-strlist * http_to_strlist(http_pack * http);
-int http_to_str(char * buf, http_pack * http);//return response http pack len, include head and body
-http_pack * http_prase(http_pack * http_request);
-
 struct _http_head_struct{
     char * key;
     char * value;
@@ -37,15 +29,20 @@ struct _http_pack_struct {
     };
 };
 
-
-
-
 typedef struct _http_pack_struct http_pack;
 
 
+int http_pack_free(http_pack * http);
+char * http_get_head_val(http_pack * http, const char * key);
+http_pack * str_to_http_head(char * str);
+strlist * http_to_strlist(http_pack * http);
+int http_to_str(char * buf, http_pack * http);//return response http pack len, include head and body
+http_pack * http_prase(int fd, http_pack * http_request);
 
+
+#ifndef HTTP10
 //http_version
-#define HTTP10 0
+#define HTTP10 3
 #define HTTP11 1
 #define HTTP20 2
 
@@ -62,7 +59,7 @@ typedef struct _http_pack_struct http_pack;
 
 
 //http_method
-#define HTTP_METHOD_GET 0
+#define HTTP_METHOD_GET 6
 #define HTTP_METHOD_POST 1
 #define HTTP_METHOD_OPTION 2
 #define HTTP_METHOD_PUT 3
@@ -74,3 +71,5 @@ typedef struct _http_pack_struct http_pack;
 #define ROOT_DOCUMENT "/var/www/html/"
 
 #define DEFAULT_TARGET_FILE "index.html"
+
+#endif

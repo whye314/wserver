@@ -52,7 +52,7 @@ int io_readn(io_buf * io, char * buf, int size){
         io->vernier = 0;
         io->len = 0;
         
-        if(n = read(io->fd, buf, size - len) < 0)
+        if((n = read(io->fd, buf, size - len)) < 0)
             return n;
         n += len;
         if(n < size)
@@ -82,11 +82,11 @@ int io_reads(io_buf * io, char * buf, const char * s){//len(s)<(IO_MAX_BUF)
     if(len > io->len){
         io_flush(io);
     }
-    int i = 0, readlen = 0;
+    char * i = 0, readlen = 0;
     while(1)
     {
-        if(i = strstr(io->s, s) != NULL){
-            readlen += io_readn(io, buf, (i + len));
+        if((i = (strstr(io->s, s) - io->s)) != NULL){
+            readlen += io_readn(io, buf, ((int)i + len));
             return readlen;
         }
         int l = io_readn(io, (buf + readlen), (IO_MAX_BUF - len));
@@ -97,7 +97,7 @@ int io_reads(io_buf * io, char * buf, const char * s){//len(s)<(IO_MAX_BUF)
 }
 
 int io_init(io_buf * io, int fd){
-    io = (io_buf *)calloc(1, sizeof(io_buf));
+    memset(io, 0, sizeof(io_buf));
     io->fd = fd;
     return 0;
 }
