@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 
 #include "types.h"
@@ -179,14 +180,15 @@ strlist * http_to_strlist(http_pack * http){
     }
 
     //body
-    *temp = (char *)calloc(1, http->body.len + 2);
-    sprintf(temp, "%s\r\n", http->body.val);
+    temp = (char *)calloc(1, http->body.len + 2);
+    sprintf(temp, "\r\n%s\r\n", http->body.val);
     node = (strlist *)calloc(1, sizeof(strlist));
     node->val = temp;
     addstr(slist, node);
 
     return slist;
 }
+
 
 
 char * http_get_head_val(http_pack * http, const char * key){//return pointer that already exists
@@ -266,19 +268,44 @@ http_pack * http_prase(int fd, http_pack * http_request){
         strcat(path, DEFAULT_TARGET_FILE);
     }
     FILE * target_file;
+    short response_code = 200;
     //need strlist to add http response head, and then new a reponse http_pack and return to main
     if((target_file = fopen(path, "rb")) == NULL){//here need an error handling
-    
-    
+        response_code = 404;
+        // http_pack * http_response;
+        // http_response = (http_pack *)calloc(1, sizeof(http_pack));
+        // http_response->status = response_code;
+        // http_response->version = HTTP10;
+        // http_response->comment = (char *)calloc(1, 10);
+        // strcpy(http_response->comment, "Not Found");
+        // return http_response;      
+        char * temp;
+        temp = (char *)calloc(1, 32);
+        sprintf(temp, "HTTP/1.0 404 Not Found\r\n");
+        write(fd, temp, strlen(temp));
+        free(temp);
     }
-    char *buf;
-    int l = 0;
-    buf = (char *)calloc(1, 1024 * sizeof(char));
-    while((l = fread(buf, 1, 1024, target_file)) > 0){
-        write(fd, buf, l);
+    else{
+        char * temp;
+        temp = (char *)calloc(1, 32);
+        sprintf(temp, "HTTP/1.0 200 OK\r\n");
+        write(fd, temp, strlen(temp));
+        free(temp);
     }
+    
+    write(fd, "Server: Wserver\r\n", 17);
+    write(fd, "\r\n", 2);
+    if(response_code == 200){
+        char *buf;
+        int l = 0;
+        buf = (char *)calloc(1, 1024 * sizeof(char));
+        while((l = fread(buf, 1, 1024, target_file)) > 0){
+            write(fd, buf, l);
+        }
+        free(buf);
+    }
+
     free(path);
-    free(buf);
     fclose(target_file);
     return 0;
 }
