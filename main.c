@@ -15,7 +15,7 @@ int doit(int fd);
 
 int main(int argc, char ** args){
     int listenfd = 0, connfd = 0;
-    int listen_port = 80;
+    int listen_port = PORT;
     if((listenfd = open_listen(listen_port)) < 0){//instead of if(listenfd = open_listen(listen_port) < 0)
         return error(SOCKET_OPEN_LISTEN_ERROR);
     }

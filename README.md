@@ -1,0 +1,1 @@
+wserver version 0.0.1 could provice static and serial service, and you can change some configure in http.h and listen.h.
